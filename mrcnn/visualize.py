@@ -82,7 +82,7 @@ def display_instances(image, boxes, masks, class_ids, class_names,
                       scores=None, title="",
                       figsize=(16, 16), ax=None,
                       show_mask=True, show_bbox=True,
-                      colors=None, captions=None, image_name="", image_type=1):
+                      colors=None, captions=None, image_name="", image_type=1, violation_indexes=None):
     """
     boxes: [num_instance, (y1, x1, y2, x2, class_id)] in image coordinates.
     masks: [height, width, num_instances]
@@ -111,17 +111,20 @@ def display_instances(image, boxes, masks, class_ids, class_names,
     # Generate random colors
     colors = colors or random_colors(N)
 
+
     # Show area outside image boundaries.
     height, width = image.shape[:2]
-    # ax.set_ylim(height + 10, -10)
-    # ax.set_xlim(-10, width + 10)
     ax.axis('off')
     ax.set_title(title)
 
     masked_image = image.astype(np.uint32).copy()
     for i in range(N):
-        color = colors[i]
-
+        # 设置没有违章的颜色
+        if not violation_indexes[i]:
+            color = colors[1]
+        # 设置有违章的颜色
+        else:
+            color = colors[0]
         # Bounding box
         if not np.any(boxes[i]):
             # Skip this instance. Has no bbox. Likely lost in image cropping.
